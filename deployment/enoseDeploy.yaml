@@ -1,0 +1,75 @@
+# Save the output of this file and use kubectl create -f to import
+# it into Kubernetes.
+#
+# Created with podman-4.4.1
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2023-10-02T20:38:59Z"
+  labels:
+    app: enose
+  name: enose
+spec:
+  ports:
+  - name: "7000"
+    nodePort: 30700
+    port: 7000
+    targetPort: 7000
+  - name: "7005"
+    nodePort: 30705
+    port: 7005
+    targetPort: 7005
+  selector:
+    app: enose
+  type: NodePort
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    org.opencontainers.image.base.digest/enose-api: sha256:4f9343cb59d27798b5db138630864039d2c5bed0c6ad38bc2e0f1756
+    org.opencontainers.image.base.digest/enose-app: sha256:0079a2aeb5d4e381205065044d14b8d98b885fa962364cdbfc542912
+    org.opencontainers.image.base.name/enose-api: registry.fedoraproject.org/fedora:38
+    org.opencontainers.image.base.name/enose-app: registry.fedoraproject.org/fedora:38
+  creationTimestamp: "2023-10-02T20:38:59Z"
+  labels:
+    app: enose
+  name: enose
+spec:
+  containers:
+  - image: quay.io/andyyuen/enose-api:1.0
+    name: enose-api
+    ports:
+    - containerPort: 7000
+    - containerPort: 7005
+    resources: {}
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      privileged: false
+      seccompProfile:
+        type: "RuntimeDefault"
+      runAsNonRoot: true
+  - env:
+    - name: MQTT_SERVER_IP
+      value: 192.168.130.11
+    - name: MQTT_SERVER_PORT
+      value: "31883"
+    image: quay.io/andyyuen/enose-app:1.0
+    name: enose-app
+    resources: {}
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      privileged: false
+      seccompProfile:
+        type: "RuntimeDefault"
+      runAsNonRoot: true
+  hostname: enose
+  restartPolicy: Never
+status: {}
+

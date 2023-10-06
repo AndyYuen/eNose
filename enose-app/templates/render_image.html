@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>eNose Smell Detection</title>
+ 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
+
+</head>
+<body>
+    <center>
+        <img id="odour-image" src= "{{image}}" width="600" height="480">
+    </center>
+
+    <script>
+        //var socket = new WebSocket("ws:{{ url_for('home', _external=True, _scheme='') }}");
+        var socket = io.connect();
+        //receive details from server
+        socket.on("updatePrediction", function (msg) {
+            console.log("Received updatePrediction :: " + msg.prediction);
+            // Select the image element using its ID
+            const image = document.getElementById('odour-image');
+
+            // Update the image source
+            image.src = "static/Image/" + msg.prediction + ".gif";
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+flask
+json5==0.9.14
+requests==2.31.0
+paho-mqtt==1.6.1
+eventlet==0.33.3
+Flask-MQTT==1.1.1
+Flask-SocketIO==5.3.6
+Flask-Bootstrap==3.3.7.1
