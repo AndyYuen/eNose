@@ -22,7 +22,7 @@ The image below shows the 2 components snapped together during use. There is an 
 ![BME688 Evaluation Kit](images/BME688-EVAL-KIT-BOARD.jpg)
 
 Bosch provides Arduino-based firmware examples and the **BME AI-Studio** for training AI models to identify different smells. You can collect your training data and save it on a SD card by using the sample firmware.The BME AI-Studio is proprietary software which allows you to train your AI model based on the training data and generate a configuration file and a meta information file about the AI model in a JSON-like format which you put on a SD card and insert into the BME688 Evaluation Kit to run your model. 
-<p>I am using neither the BME AI-Studio nor a SD card in this project after not getting the results I expected using the proprietary tools (likely due to my own faults). Instead, I developed my own firmware by enhancing a BSEC2 (Bosch Senortech Ennvironmental Cluster 2) library example and trained my own AI model using Jupyter notebook and scikit-learn.
+<p>I am using neither the BME AI-Studio nor a SD card in this project after not getting the results I expected using the proprietary tools (likely due to my own faults). Instead, I developed my own firmware by enhancing a BSEC2 (Bosch Sensortech Ennvironmental Cluster 2) library example and trained my own AI model using Jupyter notebook and scikit-learn.
 
 [More information on the BSEC2 Library](https://github.com/BoschSensortec/Bosch-BSEC2-Library) 
 
