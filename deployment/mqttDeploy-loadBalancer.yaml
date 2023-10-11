@@ -1,0 +1,53 @@
+# Save the output of this file and use kubectl create -f to import
+# it into Kubernetes.
+#
+# Created with podman-4.4.1
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    org.opencontainers.image.base.digest/mqtt: sha256:90537e9feb2b9d6ef95d18d58ab4b26e1d98ec3e1bc770cdda6255d8
+    org.opencontainers.image.base.name/mqtt: docker.io/library/alpine:3.11
+  creationTimestamp: "2023-10-01T08:03:24Z"
+  labels:
+    app: mqtt-pod
+  name: mqtt-pod
+spec:
+  containers:
+  - image: quay.io/andyyuen/mymosquitto:latest
+    name: mqtt
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      privileged: false
+      seccompProfile:
+        type: "RuntimeDefault"
+      runAsNonRoot: true
+    ports:
+    - containerPort: 1883
+      protocol: TCP
+    stdin: true
+    tty: true
+
+---
+# Save the output of this file and use kubectl create -f to import
+# it into Kubernetes.
+#
+# Created with podman-4.4.1
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2023-10-01T08:04:41Z"
+  labels:
+    app: mqtt-pod
+  name: mqtt-pod
+spec:
+  ports:
+  - name: mqtt
+    port: 1883
+    targetPort: 1883
+  selector:
+    app: mqtt-pod
+  type: LoadBalancer

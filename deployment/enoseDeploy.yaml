@@ -54,9 +54,9 @@ spec:
       runAsNonRoot: true
   - env:
     - name: MQTT_SERVER_IP
-      value: 192.168.130.11
+      value: mqtt-pod.mqtt.svc.cluster.local
     - name: MQTT_SERVER_PORT
-      value: "31883"
+      value: "1883"
     image: quay.io/andyyuen/enose-app:1.0
     name: enose-app
     resources: {}

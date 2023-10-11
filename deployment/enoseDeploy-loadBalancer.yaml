@@ -12,16 +12,14 @@ metadata:
 spec:
   ports:
   - name: "7000"
-    nodePort: 30700
     port: 7000
     targetPort: 7000
   - name: "7005"
-    nodePort: 30705
     port: 7005
     targetPort: 7005
   selector:
     app: enose
-  type: NodePort
+  type: LoadBalancer
 ---
 apiVersion: v1
 kind: Pod
@@ -54,9 +52,9 @@ spec:
       runAsNonRoot: true
   - env:
     - name: MQTT_SERVER_IP
-      value: TARGET_MQTT_SERVER_IP
+      value: mqtt-pod.mqtt.svc.cluster.local
     - name: MQTT_SERVER_PORT
-      value: "TARGET_MQTT_SERVER_PORT"
+      value: "1883"
     image: quay.io/andyyuen/enose-app:1.0
     name: enose-app
     resources: {}

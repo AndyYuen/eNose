@@ -75,7 +75,7 @@ podman pull quay.io/andyyuen/enose-app:1.0
 * deployment - contains a shell scripts: 
 <br/>'**eNosePodmanDeploy.sh**' to run the REST API and AI applications using podmand; and a yaml file for deployment to MicroShft. 
 <br/>'**mqttPodmanDeploy.sh**' starts a MQTT server which is a central piece of infrastructure to make the eNose application work.
-<br/>'**customiseEnoseDeployYaml**' creates the enoseDeploy.yaml for deployment to MicroShift. See Section 6 for details.
+<br/>And a number of yaml files for deployment to MicroShift and OpenShift. See Section 6 for details.
 
 * enose-api - contains the REST API Flask source code and a Dockerfile for creating a container image.
 
@@ -178,6 +178,7 @@ If you need to deploy in MicroShift, your have to push your enose-api image to a
 
 
 ## 6. Running the eNose Application
+### 6.1 Deployment Using Podman
 1. Start the MQTT server
 ~~~~
 # Assuming you are going to run all containers on your laptop using podman 
@@ -188,7 +189,7 @@ cd deployment
 
 2. Power up the BME688 Evaluation Kit
 
-3. start the REST API and AI application
+3. Start the REST API and AI application
 ~~~~
 # Usage: ./eNosePodmanDeploy.sh mqttServerIP mqttServerPort
 ./eNosePodmanDeploy.sh 192.168.1.153 1883
@@ -196,25 +197,78 @@ cd deployment
 # where 192.168.1.153 is my MQTT server IP address and 1883 is my MQTT Server port
 # You need to change them to match your environment
 ~~~~
-Note that MicroShift **mqttDeploy.yaml** uses nodeport set to 31883 hence your **enoseDeploy.yaml**'s environment variables have to be set appropriately. Remember that before you deploy the enose to MicroShift, you have to change the following values to match your environment:
+
+4. Point your browser to http://localhost:7005 to see the sniffing dog.
+
+5. Put the BME688 Evaluation Kit in jars with different smells and see the UI switch to the animated gif for the smell. Please note that every time you switch to a different jar, it may take 10 to 20 seconds to detect the new smell. So be patient.
+
+### 6.2 Deploying to MicroShift
+Only the steps that are different from Section 6.1 'Deployment using Podman' are shown below:
+
+1. Start the MQTT server
+~~~~
+# Assuming you are in the eNose directory
+cd deployment
+
+kubectl create ns mqtt
+kubectl create -f mqttDeploy.yaml -n mqtt
+~~~~
+
+3. Start the REST API and AI application
+~~~~
+kubectl create ns enose
+kubectl create enoseDeploy.yaml -n enose
+~~~~
+the enoseDeploy.yaml references the MQTT server from within MicroShift using 'mqtt-pod.mqtt.svc.cluster.local' as the MQTT_SERVER_IP.
 ~~~~
   - env:
     - name: MQTT_SERVER_IP
-      value: 192.168.130.11
+      value: mqtt-pod.mqtt.svc.cluster.local
     - name: MQTT_SERVER_PORT
-      value: "31883"
+      value: "1883"
 ~~~~
-Instead of having you start up your editor to change the file, I have created a shell script to do that for you. Just run:
+
+4. Point your browser to http://microshiftServerIP:30705 to see the sniffing dog.
+
+### 6.3 Deploying to OpenShift in the Cloud (AWS ROSA)
+Again, only the steps that are different from Section 6.1 'Deployment using Podman' are shown below:
+1. Start the MQTT server
 ~~~~
-# Assuming you are at eNose directory
+# Assuming you are in the eNose directory
 cd deployment
-./customiseEnoseDeployYaml.sh mqttServerIP mqttServerPort
+
+oc create ns mqtt
+oc create -f mqttDeploy-loadBalancer.yaml -n mqtt
 ~~~~
-where mqttServerIP, mqttServerPort are the server IP and port of your mQTT server respectively. This will create the enoseDeploy.yaml for you with the server IP and port you specified.
 
-4. Point your browser (assuming running everything on your local machine using podman) to http://localhost:7005. If you are running the eNose application on MicroShift, point your beowser to http://microshiftServerIP:30705.
+3. Start the REST API and AI application
+~~~~
+oc create ns enose
+oc create enoseDeploy-loadBalancer.yaml -n enose
+~~~~
+the enoseDeploy.yaml references the MQTT server from within MicroShift using 'mqtt-pod.mqtt.svc.cluster.local' as the MQTT_SERVER_IP.
+~~~~
+  - env:
+    - name: MQTT_SERVER_IP
+      value: mqtt-pod.mqtt.svc.cluster.local
+    - name: MQTT_SERVER_PORT
+      value: "1883"
+~~~~
+In public cloud, it is not that easy to access the nodeports due to difficulty in accessing a worker node's external IP. An easier way is to use a load balancer provided by the cloud vendor. This is the info displayed for the mqtt-pod and enose services.
+~~~~
+oc get svc -n mqtt
+NAME                TYPE           CLUSTER-IP      EXTERNAL-IP                                                               PORT(S)   
+mqtt-pod            LoadBalancer   172.30.78.154   a1b99bba2453448e799780f15786331d-1806257633.us-east-2.elb.amazonaws.com   1883:31883/TCP                        3h51m
 
-5. Put the BME688 Evaluation Kit in jars with different smells and see the UI switch to the animated gif for the smell. Please note that every time you switch to a different jar, it may take 10 to 20 seconds to detect the new smell. So be patient.
+oc get svc -n enose
+NAME                TYPE           CLUSTER-IP      EXTERNAL-IP                                                               PORT(S)                               AGE
+enose               LoadBalancer   172.30.204.14   a2ee3b53bed054a2cb74705cf5463942-912096501.us-east-2.elb.amazonaws.com    7000:30700/TCP,7005:30705/TCP         110m
+~~~~
+You will see the external IP addresses of the load balancers, the long strings ending in 'us-east-2.elb.amazonaws.com.
+
+4. Point your browser to http://a2ee3b53bed054a2cb74705cf5463942-912096501.us-east-2.elb.amazonaws.com:7005 to see the sniffing dog.
+
+Note: you have to substitute the external IP with yours in the command above.
 
 ## 7. A MQTT Message Sample
 Here is a sample message, consisting of all 8 sensor readings, sent to the 'sensorData' topic by the BME688 Evaluation Kit every 3 seconds.
