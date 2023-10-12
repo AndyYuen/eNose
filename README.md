@@ -237,13 +237,13 @@ Again, only the steps that are different from Section 6.1 'Deployment using Podm
 # Assuming you are in the eNose directory
 cd deployment
 
-oc create ns mqtt
+oc new-project mqtt
 oc create -f mqttDeploy-loadBalancer.yaml -n mqtt
 ~~~~
 
 3. Start the REST API and AI application
 ~~~~
-oc create ns enose
+oc new-project enose
 oc create enoseDeploy-loadBalancer.yaml -n enose
 ~~~~
 the enoseDeploy.yaml references the MQTT server from within MicroShift using 'mqtt-pod.mqtt.svc.cluster.local' as the MQTT_SERVER_IP.
